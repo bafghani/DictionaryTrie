@@ -219,9 +219,8 @@ DictionaryTrie::DictionaryTrieNode* DictionaryTrie::insertNode(
         curr->right = insertNode(word, index, wordFreq, curr->right);
     }
 
-    else {
-        / / recurse child curr->child =
-            insertNode(word, index + 1, wordFreq, curr->child);
+    else {  // recurse child
+        curr->child = insertNode(word, index + 1, wordFreq, curr->child);
     }
 
     return curr;  // return the current node
