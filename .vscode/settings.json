@@ -1,0 +1,9 @@
+{
+    "editor.formatOnSave": true,
+    "gitlens.blame.compact": false,
+    "files.associations": {
+        "new": "cpp",
+        "iostream": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
+}
