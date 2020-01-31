@@ -52,7 +52,7 @@ TEST(DictTrieTests, PREDICT_EMPTY) {
 }
 TEST(DictTrieTests, PREDICT_SMALL) {
     DictionaryTrie dict;
-    vector<string> compare{"apple", "appendage", "ape", "apparent"};
+    vector<string> compare{"apparent", "ape", "appendage", "apple"};
     dict.insert("apple", 5);
     dict.insert("appendage", 4);
     dict.insert("ape", 3);
@@ -62,17 +62,25 @@ TEST(DictTrieTests, PREDICT_SMALL) {
 }
 TEST(DictTrieTests, PREDICT_LARGE_NUMCOMPLETIONS) {
     DictionaryTrie dict;
-    vector<string> compare{"apple", "appendage", "ape", "apparent"};
+    vector<string> compare{"apparent", "ape", "appendage", "apple"};
     dict.insert("apple", 5);
     dict.insert("appendage", 4);
     dict.insert("ape", 3);
     dict.insert("apparent", 2);
+    dict.insert("tired", 69);
+    dict.insert("sad", 420);
+    dict.insert("deez", 9000);
+    dict.insert("nuts", 5000);
     vector<string> vec = dict.predictCompletions("ap", 7);
     ASSERT_EQ(compare, vec);
 }
 TEST(DictTrieTests, PREDICT_1) {
     DictionaryTrie dict;
     vector<string> compare{"apple"};
+    dict.insert("tired", 69);
+    dict.insert("sad", 420);
+    dict.insert("deez", 9000);
+    dict.insert("nuts", 5000);
     dict.insert("apple", 5);
     dict.insert("banana", 4);
     dict.insert("orange", 3);
