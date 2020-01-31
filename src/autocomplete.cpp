@@ -75,21 +75,18 @@ int main(int argc, char** argv) {
         cout << "Enter a number of completions:" << endl;
         cin >> numberOfCompletions;
 
-        // if word is empty error until a word is entered
+        // Checks for valid prefix
         if (word == "") {
             while (word == "") {
-                cout << "Please enter a valid word prefix to search for: "
-                     << endl;
+                cout << "Enter valid prefix: " << endl;
                 cin >> word;
             }
         }
 
-        // vector to store the results
         vector<string> sortedCompletions;
 
         sortedCompletions = dt->predictCompletions(word, numberOfCompletions);
 
-        // output answers
         while (!sortedCompletions.empty()) {
             cout << sortedCompletions.back() << endl;
             sortedCompletions.pop_back();

@@ -13,7 +13,9 @@
 #include <utility>
 #include <vector>
 
-/* TODO */
+/**
+ * Node constructor
+ */
 DictionaryTrie::DictionaryTrieNode::DictionaryTrieNode(char thisLabel)
     : nodeLabel(thisLabel),
       left(0),
@@ -24,9 +26,10 @@ DictionaryTrie::DictionaryTrieNode::DictionaryTrieNode(char thisLabel)
 
 DictionaryTrie::DictionaryTrie() : root(0) {}
 
-/* TODO */
+/**
+ * insert
+ */
 bool DictionaryTrie::insert(string word, unsigned int freq) {
-    // checks if the word is empty or the freq. is less than 0
     if (word.length() == 0 || freq <= 0) {
         return false;
     }
@@ -38,12 +41,12 @@ bool DictionaryTrie::insert(string word, unsigned int freq) {
         root = new DictionaryTrieNode(word.at(0));
         curr = root;
 
-        int currIndex = 1;
-        // iterates through the word and returns
-        while (currIndex < word.length()) {
-            curr->child = new DictionaryTrieNode(word.at(currIndex));
+        int index = 1;
+
+        while (index < word.length()) {
+            curr->child = new DictionaryTrieNode(word.at(index));
             curr = curr->child;
-            currIndex++;
+            index++;
         }
 
         curr->isWordNode = true;
@@ -63,13 +66,15 @@ bool DictionaryTrie::insert(string word, unsigned int freq) {
     return true;
 }
 
-/* TODO */
+/**
+ * find
+ */
 bool DictionaryTrie::find(string word) const {
     // creates curr node and sets it to root
     DictionaryTrieNode* curr = root;
 
-    // iterator to iterate through the string
-    string::iterator wordIter = word.begin();
+    // iterate through the string
+    string::iterator strItr = word.begin();
 
     if (curr == nullptr) {
         return false;
@@ -80,24 +85,20 @@ bool DictionaryTrie::find(string word) const {
             return 0;
         }
 
-        // if the curr character is less than that of the node go left
-        if (*wordIter < curr->nodeLabel) {
+        // Left
+        if (*strItr < curr->nodeLabel) {
             if (curr->left != nullptr) {
                 curr = curr->left;
-            }
-            // if no left exists return false
-            else {
+            } else {
                 return false;
             }
         }
 
-        // if the curr character is greater than that of the node go right
-        else if (*wordIter > curr->nodeLabel) {
+        // Right
+        else if (*strItr > curr->nodeLabel) {
             if (curr->right != nullptr) {
                 curr = curr->right;
-            }
-            // if no right child exists return false
-            else {
+            } else {
                 return false;
             }
         }
@@ -105,7 +106,7 @@ bool DictionaryTrie::find(string word) const {
         // if the value of the curr character is equal to that of the node's
         else {
             // if we are at the end of the string and the node is a word node
-            if (wordIter == word.end() - 1 && *wordIter == curr->nodeLabel &&
+            if (strItr == word.end() - 1 && *strItr == curr->nodeLabel &&
                 curr->isWordNode) {
                 return true;
             }
@@ -113,9 +114,9 @@ bool DictionaryTrie::find(string word) const {
             else {
                 // set the curr to it's child and iterate to the next
                 // character in the string
-                if (curr->nodeLabel == *wordIter) {
+                if (curr->nodeLabel == *strItr) {
                     curr = curr->child;
-                    wordIter++;
+                    strItr++;
                 }
                 // else statement for safety's sake
                 else {
@@ -126,32 +127,34 @@ bool DictionaryTrie::find(string word) const {
     }
 }
 
-/* TODO */
+/**
+ * predictCompletions
+ */
 vector<string> DictionaryTrie::predictCompletions(string prefix,
                                                   unsigned int numCompletions) {
     // string to store the final completion set
     vector<string> finalCompletions;
-    // if numcompletions is less than equal to 0 return
+    // Returns if numCompletions is less than/equal to 0
     if (numCompletions <= 0) {
         return finalCompletions;
     }
-    // find the node that matches to the last letter of the prefix
+    // find the node that matches last letter of the prefix
     DictionaryTrieNode* lastPrefixNode = findNode(prefix);
 
-    // if this node is null, return
+    // Returns if node is null
     if (lastPrefixNode == nullptr) {
         return finalCompletions;
     }
 
-    // if node is a word, push to prioirty queue
+    // if node is a word, push to PQ
     if (lastPrefixNode->isWordNode) {
         thisPQ.push(pair<int, string>(lastPrefixNode->wordFrequency, prefix));
     }
 
-    // call helper
+    // Calls DPS
     depthFirst(prefix, lastPrefixNode->child, numCompletions);
 
-    // pop into the vector from pq
+    // pop into finalCompletions
     while (thisPQ.size() != 0) {
         finalCompletions.push_back(thisPQ.top().second);
         thisPQ.pop();
@@ -165,30 +168,30 @@ std::vector<string> DictionaryTrie::predictUnderscores(
     return {};
 }
 
-/* TODO */
-DictionaryTrie::~DictionaryTrie() {
-    // call a destructor helper method
-    deleteAll(root);
-}
+/**
+ * Destructor
+ */
+DictionaryTrie::~DictionaryTrie() { deleteAll(root); }
 
-// Insert Node Helper
+/**
+ * Insert Node Helper
+ */
 DictionaryTrie::DictionaryTrieNode* DictionaryTrie::insertNode(
-    string word, int currentIndex, int wordFreq, DictionaryTrieNode* curr) {
-    // if the node does not exists in the trie yet
+    string word, int index, int wordFreq, DictionaryTrieNode* curr) {
+    // if node does not exists
     if (curr == nullptr) {
-        if (currentIndex == word.length() - 1) {
-            curr = new DictionaryTrieNode(word.at(currentIndex));
+        if (index == word.length() - 1) {
+            curr = new DictionaryTrieNode(word.at(index));
             curr->wordFrequency = wordFreq;
             curr->isWordNode = true;
             return curr;
         } else {
-            curr = new DictionaryTrieNode(word.at(currentIndex));
+            curr = new DictionaryTrieNode(word.at(index));
         }
     }
-    // if the node exists
+    // if node exists
     else {
-        if (currentIndex == word.length() - 1 &&
-            curr->nodeLabel == word.at(currentIndex) &&
+        if (index == word.length() - 1 && curr->nodeLabel == word.at(index) &&
             curr->isWordNode == false) {
             curr->isWordNode = true;
             curr->wordFrequency = wordFreq;
@@ -197,43 +200,43 @@ DictionaryTrie::DictionaryTrieNode* DictionaryTrie::insertNode(
     }
 
     // recurse left
-    if (word.at(currentIndex) < curr->nodeLabel) {
-        curr->left = insertNode(word, currentIndex, wordFreq, curr->left);
+    if (word.at(index) < curr->nodeLabel) {
+        curr->left = insertNode(word, index, wordFreq, curr->left);
     }
 
     // recurse right
-    else if (word.at(currentIndex) > curr->nodeLabel) {
-        curr->right = insertNode(word, currentIndex, wordFreq, curr->right);
+    else if (word.at(index) > curr->nodeLabel) {
+        curr->right = insertNode(word, index, wordFreq, curr->right);
     }
     // recurse child
     else {
-        curr->child = insertNode(word, currentIndex + 1, wordFreq, curr->child);
+        curr->child = insertNode(word, index + 1, wordFreq, curr->child);
     }
     // return the curr
     return curr;
 }
 
-/* Method Description: Method is a helper method to find the node of the
- * last letter in a given prefix, which is passed as the function argument.
+/**
+ * findNode
  */
 DictionaryTrie::DictionaryTrieNode* DictionaryTrie::findNode(string prefix) {
-    // Sets a curr node to traverse as initally root
     DictionaryTrieNode* curr = root;
-    // iterator to traverse the string
-    string::iterator stringIter = prefix.begin();
 
+    // iterate through the string
+    string::iterator strItr = prefix.begin();
+
+    // root is null
     if (root == nullptr) {
         return nullptr;
     }
 
     while (true) {
-        // if the node is null, just return null
         if (curr == nullptr) {
             break;
         }
 
-        // if the curr character is less than that of the node go left
-        if (*stringIter < curr->nodeLabel) {
+        // Left
+        if (*strItr < curr->nodeLabel) {
             if (curr->left) {
                 curr = curr->left;
             } else {
@@ -241,8 +244,8 @@ DictionaryTrie::DictionaryTrieNode* DictionaryTrie::findNode(string prefix) {
             }
         }
 
-        // if the curr character is greater than that of the node go right
-        else if (*stringIter > curr->nodeLabel) {
+        // Right
+        else if (*strItr > curr->nodeLabel) {
             if (curr->right) {
                 curr = curr->right;
             } else {
@@ -250,18 +253,17 @@ DictionaryTrie::DictionaryTrieNode* DictionaryTrie::findNode(string prefix) {
             }
         }
 
-        // if the value of the curr character is equal to that of the node's
+        // Down
         else {
-            // if we are at the end of the prefix
-            if (stringIter == prefix.end() - 1 &&
-                *stringIter == curr->nodeLabel) {
+            // End of prefix
+            if (strItr == prefix.end() - 1 && *strItr == curr->nodeLabel) {
                 return curr;
             }
             // iterate to the child
             else {
-                if (curr->nodeLabel == *stringIter) {
+                if (curr->nodeLabel == *strItr) {
                     curr = curr->child;
-                    stringIter++;
+                    strItr++;
                 } else {
                     return nullptr;
                 }
@@ -271,24 +273,21 @@ DictionaryTrie::DictionaryTrieNode* DictionaryTrie::findNode(string prefix) {
     return nullptr;
 }
 
-/* Method Description: This method is a helper method for the
- * predictCompletions method. Takes in a prefix, and a curr and
- * then builds all of the words that come after the prefix and then adds
- * them to the priority queue thisPQ. Returns a string  vector of up to the
- * number of desired completions.
+/**
+ * DPS
  */
 void DictionaryTrie::depthFirst(string prefix, DictionaryTrieNode* curr,
                                 int numCompletions) {
     // if curr is not null
     if (curr) {
-        // recurse on the left and right subtrees
+        // recurse left
         depthFirst(prefix, curr->left, numCompletions);
+        // recurse right
         depthFirst(prefix, curr->right, numCompletions);
 
-        // add node char to prefix
         prefix.push_back(curr->nodeLabel);
 
-        // if it is word node add to priority queue
+        // if word node add to PQ
         if (curr->isWordNode) {
             if (thisPQ.size() < numCompletions) {
                 thisPQ.push(pair<int, string>(curr->wordFrequency, prefix));
@@ -305,21 +304,16 @@ void DictionaryTrie::depthFirst(string prefix, DictionaryTrieNode* curr,
     }
 }
 
-/* Method Description: Helper method for the destructor. Given the root
- * of a given subtrie, recursively deletes the right, left, and child
- * subtrees before deleting the node itself.
+/**
+ * Destructor Helper
  */
-void DictionaryTrie::deleteAll(DictionaryTrieNode* trieRoot) {
-    // if the curr node is null return
-    if (trieRoot == nullptr) {
+void DictionaryTrie::deleteAll(DictionaryTrieNode* root) {
+    if (root == nullptr) {
         return;
     }
-    // delete left subtree
-    deleteAll(trieRoot->left);
-    // delete right subtree
-    deleteAll(trieRoot->right);
-    // delete child subtree
-    deleteAll(trieRoot->child);
-    // delete curr node
-    delete trieRoot;
+
+    deleteAll(root->left);
+    deleteAll(root->right);
+    deleteAll(root->child);
+    delete root;
 }
