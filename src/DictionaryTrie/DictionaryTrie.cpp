@@ -1,8 +1,11 @@
 /**
- * TODO: File Header
+ * This file implements functions defined
+ * in DictionaryTrie.hpp in order to build
+ * a fully functional Dictionary Trie
+ * based on a MWT
  *
- * Author: Joseph Mattingly
- * Author:
+ * Authors: Joseph Mattingly
+ *          Bijan Afghani
  */
 #include "DictionaryTrie.hpp"
 #include <string.h>
@@ -15,6 +18,8 @@
 
 /**
  * Node constructor
+ * @param thisLabel the letter we want
+ * our node to store
  */
 DictionaryTrie::DictionaryTrieNode::DictionaryTrieNode(char thisLabel)
     : nodeLabel(thisLabel),
@@ -26,9 +31,11 @@ DictionaryTrie::DictionaryTrieNode::DictionaryTrieNode(char thisLabel)
 
 DictionaryTrie::DictionaryTrie() : root(0) {}
 
-/**
- * insert
- */
+/* inserts a new word into the dictionary
+ * @param word, the word we want to insert
+ * @param freq, the number of times that word occurs
+ * @return true if inserted false if duplicate
+ **/
 bool DictionaryTrie::insert(string word, unsigned int freq) {
     if (word.length() == 0 || freq <= 0) {
         return false;
@@ -66,9 +73,10 @@ bool DictionaryTrie::insert(string word, unsigned int freq) {
     return true;
 }
 
-/**
- * find
- */
+/* finds a word in the dictionary
+ * @param word we want to find
+ * @return true if found false otherwise
+ **/
 bool DictionaryTrie::find(string word) const {
     // creates curr node and sets it to root
     DictionaryTrieNode* curr = root;
@@ -127,9 +135,12 @@ bool DictionaryTrie::find(string word) const {
     }
 }
 
-/**
- * predictCompletions
- */
+/* predicts words given a prefix based on words with
+ * the highest frequencies
+ * @param prefix, the prefix we want to complete
+ * @param numCompletions, the number of suggestions we want
+ * @return a vector of suggested completions
+ **/
 vector<string> DictionaryTrie::predictCompletions(string prefix,
                                                   unsigned int numCompletions) {
     // string to store the final completion set
@@ -162,7 +173,11 @@ vector<string> DictionaryTrie::predictCompletions(string prefix,
     return finalCompletions;
 }
 
-/* TODO */
+/* predicts words given a pattern with underscores
+ * @param pattern, the pattern we want to complete
+ * @param numCompletions, the number of suggestions we want
+ * @return a vector of suggested completions
+ **/
 std::vector<string> DictionaryTrie::predictUnderscores(
     string pattern, unsigned int numCompletions) {
     return {};
@@ -170,6 +185,8 @@ std::vector<string> DictionaryTrie::predictUnderscores(
 
 /**
  * Destructor
+ * deletes all nodes of Dictionary Trie
+ * Avoids Memory Leaks
  */
 DictionaryTrie::~DictionaryTrie() { deleteAll(root); }
 
@@ -274,7 +291,7 @@ DictionaryTrie::DictionaryTrieNode* DictionaryTrie::findNode(string prefix) {
 }
 
 /**
- * DPS
+ * DFS
  */
 void DictionaryTrie::depthFirst(string prefix, DictionaryTrieNode* curr,
                                 int numCompletions) {
@@ -306,6 +323,7 @@ void DictionaryTrie::depthFirst(string prefix, DictionaryTrieNode* curr,
 
 /**
  * Destructor Helper
+ * Recursively deletes all nodes
  */
 void DictionaryTrie::deleteAll(DictionaryTrieNode* root) {
     if (root == nullptr) {

@@ -1,5 +1,11 @@
 /*
- * TODO: File Header
+ * This file does a bunch of voodoo and then calls
+ * the predictCompletions function to give the
+ * user of list of suggested words based on their
+ * prefix and highest frequency.
+ *
+ * Authors: Bijan Afghani
+ *          Joseph Mattingly
  */
 #include <algorithm>
 #include <fstream>
