@@ -118,6 +118,14 @@ class DictionaryTrie {
     vector<string> predictUnderscores(string pattern,
                                       unsigned int numCompletions);
 
+    /**
+     * predict underscore helper
+     */
+    void predictUnderscoresHelper(string pattern, string patternInProgress,
+                                  int currIndex,
+                                  DictionaryTrieNode* currentNode,
+                                  int numCompletions);
+
     /* Destructor for the DictionaryTrie object to avoid memory leaks */
     ~DictionaryTrie();
 };

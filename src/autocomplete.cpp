@@ -89,9 +89,24 @@ int main(int argc, char** argv) {
             }
         }
 
+        // check for underscore
+        bool isUnderscore = false;
+        for (int index = 0; index < word.length(); index++) {
+            if (int(word.at(index)) == 95) {
+                isUnderscore = true;
+                break;
+            }
+        }
+
         vector<string> sortedCompletions;
 
-        sortedCompletions = dt->predictCompletions(word, numberOfCompletions);
+        if (isUnderscore) {
+            sortedCompletions =
+                dt->predictUnderscores(word, numberOfCompletions);
+        } else {
+            sortedCompletions =
+                dt->predictCompletions(word, numberOfCompletions);
+        }
 
         while (!sortedCompletions.empty()) {
             cout << sortedCompletions.back() << endl;
