@@ -88,3 +88,63 @@ TEST(DictTrieTests, PREDICT_1) {
     vector<string> vec = dict.predictCompletions("ap", 3);
     ASSERT_EQ(compare, vec);
 }
+
+/*  PREDICT UNDERSCORES TESTS   */
+
+TEST(DictTrieTests, COMPLETE_EMPTY) {
+    DictionaryTrie dict;
+    vector<string> compare;
+    vector<string> vec = dict.predictUnderscores("bi_", 2);
+    ASSERT_EQ(compare, vec);
+}
+TEST(DictTrieTests, COMPLETE_END_OF_WORD) {
+    DictionaryTrie dict;
+    vector<string> compare({"bij"});
+    dict.insert("bij", 5);
+    vector<string> vec = dict.predictUnderscores("bi_", 2);
+    ASSERT_EQ(compare, vec);
+}
+TEST(DictTrieTests, COMPLETE_MIDDLE_OF_WORD) {
+    DictionaryTrie dict;
+    vector<string> compare({"bij"});
+    dict.insert("bij", 5);
+    vector<string> vec = dict.predictUnderscores("b_j", 2);
+    ASSERT_EQ(compare, vec);
+}
+TEST(DictTrieTests, COMPLETE_BEGINNING_OF_WORD) {
+    DictionaryTrie dict;
+    vector<string> compare({"bij"});
+    dict.insert("bij", 5);
+    vector<string> vec = dict.predictUnderscores("_ij", 2);
+    ASSERT_EQ(compare, vec);
+}
+TEST(DictTrieTests, COMPLETE_MULTIPLE_WORDS) {
+    DictionaryTrie dict;
+    vector<string> compare({"baj", "boj", "bij"});
+    dict.insert("bij", 5);
+    dict.insert("boj", 4);
+    dict.insert("baj", 3);
+    vector<string> vec = dict.predictUnderscores("b_j", 3);
+    ASSERT_EQ(compare, vec);
+}
+TEST(DictTrieTests, COMPLETE_MULTIPLE_UNDERSCORES) {
+    DictionaryTrie dict;
+    vector<string> compare({"bij"});
+    dict.insert("bij", 5);
+    vector<string> vec = dict.predictUnderscores("b__", 2);
+    ASSERT_EQ(compare, vec);
+}
+TEST(DictTrieTests, COMPLETE_MULTIPLE_UNDERSCORES_2) {
+    DictionaryTrie dict;
+    vector<string> compare({"bij"});
+    dict.insert("bij", 5);
+    vector<string> vec = dict.predictUnderscores("_i_", 2);
+    ASSERT_EQ(compare, vec);
+}
+TEST(DictTrieTests, COMPLETE_ALL_UNDERSCORES) {
+    DictionaryTrie dict;
+    vector<string> compare({"bij"});
+    dict.insert("bij", 5);
+    vector<string> vec = dict.predictUnderscores("___", 1);
+    ASSERT_EQ(compare, vec);
+}
