@@ -56,6 +56,7 @@ class DictionaryTrie {
         char const nodeLabel;
         bool isWordNode;
         unsigned int wordFrequency;
+        unsigned int maxFrequency;  // maximum frequency of node's subtrie
 
         // Default constructor for the DictionaryTrieNode Class
         DictionaryTrieNode(char thisLabel);

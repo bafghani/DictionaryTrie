@@ -176,24 +176,19 @@ vector<string> DictionaryTrie::predictCompletions(string prefix,
  **/
 std::vector<string> DictionaryTrie::predictUnderscores(
     string pattern, unsigned int numCompletions) {
-    // vector to store the final set of strings
-    vector<string> finalCompletionSet;
-
-    // if the number of completions is less than equal to zero or the
-    // pattern is an empty string, return
+    vector<string> finalCompletionSet;  // vector to store string predictions
+    // Edge case (numCompletions <= 0 or pattern is empty string)
     if (numCompletions <= 0 || pattern == "") {
-        return finalCompletionSet;
+        return finalCompletionSet;  // return empty list
     }
-
     // helper method to recursively find the underscore patterns
     predictUnderscoresHelper(pattern, "", 0, root, numCompletions);
-
-    // put the priority queue's elements into the vector
+    // add priority queue's elements into vector in required order
     while (!underscorePQ.empty()) {
         finalCompletionSet.push_back(underscorePQ.top().second);
         underscorePQ.pop();
     }
-
+    // return the vector of suggested completions
     return finalCompletionSet;
 }
 
@@ -333,39 +328,42 @@ void DictionaryTrie::predictUnderscoresHelper(string pattern,
                                               int index,
                                               DictionaryTrieNode* curr,
                                               int numCompletions) {
-    // Index is out of bounds
+    // Edge Case (Index Out of Bounds)
     if (index >= pattern.length()) {
         return;
     }
 
-    // If current node is null
+    // Edge Case (Current Node is null)
     if (curr == NULL) {
         return;
     }
 
-    // Index of string is an underscore
+    // If the current index of the string is an underscore
     if (pattern.[index] == '_') {
-        // Gets all the underscores on the left
+        // Recursively retrieves all the underscores on the left subtrie
         if (curr->left) {
             predictUnderscoresHelper(pattern, patternInProgress, index,
                                      curr->left, numCompletions);
         }
 
-        // retrivers all the underscores on the right subtrie
+        // recursively retrieves all the underscores on the right subtrie
         if (curr->right) {
             predictUnderscoresHelper(pattern, patternInProgress, index,
                                      curr->right, numCompletions);
         }
 
-        // push back to make a new string in progress
+        // push back to update current pattern in progress by adding curr's char
         patternInProgress.push_back(curr->nodeLabel);
-        // if the curr is a word node and we have reached the last index
+        // if curr is a word node and we have reached the last index
         if (curr->isWordNode && index == pattern.length() - 1) {
             if (underscorePQ.size() < numCompletions) {
-                underscorePQ.push(
-                    pair<int, string>(curr->wordFrequency, patternInProgress));
+                underscorePQ.push(pair<int, string>(
+                    curr->wordFrequency, patternInProgress));  // add to PQ
             } else {
-                if (curr->wordFrequency > underscorePQ.top().first) {
+                if (curr->wordFrequency >
+                    underscorePQ.top()
+                        .first) {  // if curr has greater frequency
+                                   // than top of PQ, replace with curr
                     underscorePQ.pop();
                     underscorePQ.push(pair<int, string>(curr->wordFrequency,
                                                         patternInProgress));
@@ -384,24 +382,27 @@ void DictionaryTrie::predictUnderscoresHelper(string pattern,
     else {
         // if the char of current is equal to the string's char
         if (pattern[index] == curr->nodeLabel) {
-            patternInProgress.push_back(curr->nodeLabel);
+            patternInProgress.push_back(
+                curr->nodeLabel);  // add char to pattern in progress
 
             // if we are at the end of the prefix
             if (curr->isWordNode && index == pattern.length() - 1) {
                 if (underscorePQ.size() < numCompletions) {
-                    underscorePQ.push(pair<int, string>(curr->wordFrequency,
-                                                        patternInProgress));
+                    underscorePQ.push(pair<int, string>(
+                        curr->wordFrequency,
+                        patternInProgress));  // push new pair to PQ
                 } else {
                     if (curr->wordFrequency > underscorePQ.top().first) {
                         underscorePQ.pop();
-                        underscorePQ.push(pair<int, string>(curr->wordFrequency,
-                                                            patternInProgress));
+                        underscorePQ.push(pair<int, string>(
+                            curr->wordFrequency,
+                            patternInProgress));  // update order of PQ
                     }
                 }
                 return;
             }
-            // if we are not
-            else {
+            // if we are not at the end of the prefix
+            else {  // recurse child
                 predictUnderscoresHelper(pattern, patternInProgress, index + 1,
                                          curr->child, numCompletions);
             }
