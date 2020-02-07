@@ -145,13 +145,13 @@ vector<string> DictionaryTrie::predictCompletions(string prefix,
     vector<string> completionSet;  // vector to store all predictions
 
     if (numCompletions <= 0) {  // Edge case if numCompletions is <= 0
-        return CompletionSet;
+        return completionSet;
     }
     // find node that contains prefix
     DictionaryTrieNode* endOfPrefix = findNode(prefix);
 
     if (endOfPrefix == nullptr) {  // Returns if node is null
-        return CompletionSet;
+        return completionSet;
     }
 
     // if node is a word, push to Priority Queue
@@ -163,10 +163,10 @@ vector<string> DictionaryTrie::predictCompletions(string prefix,
     depthFirst(prefix, endOfPrefix->child, numCompletions);
 
     while (thisPQ.size() != 0) {  // push into vector
-        CompletionSet.push_back(thisPQ.top().second);
+        completionSet.push_back(thisPQ.top().second);
         thisPQ.pop();  // pop from Priority Queue
     }
-    return CompletionSet;
+    return completionSet;
 }
 
 /* predicts words given a pattern with underscores
@@ -211,11 +211,11 @@ DictionaryTrie::DictionaryTrieNode* DictionaryTrie::insertNode(
             curr->isWordNode = true;
             /* MAX FREQ UPDATE */
             curr->maxFrequency = Freq;
-            if (curr->left->wordFrequency > curr->maxFrequency) {
-                curr->maxFrequency = curr->left->wordFrequency;
+            if (curr->left->Frequency > curr->maxFrequency) {
+                curr->maxFrequency = curr->left->Frequency;
             }
-            if (curr->right->wordFrequency > curr->maxFrequency) {
-                curr->maxFrequency = curr->right->wordFrequency;
+            if (curr->right->Frequency > curr->maxFrequency) {
+                curr->maxFrequency = curr->right->Frequency;
             }
             return curr;
         } else {
@@ -230,11 +230,11 @@ DictionaryTrie::DictionaryTrieNode* DictionaryTrie::insertNode(
             curr->Frequency = Freq;
             /* MAX FREQ UPDATE */
             curr->maxFrequency = Freq;
-            if (curr->left->wordFrequency > curr->maxFrequency) {
-                curr->maxFrequency = curr->left->wordFrequency;
+            if (curr->left->Frequency > curr->maxFrequency) {
+                curr->maxFrequency = curr->left->Frequency;
             }
-            if (curr->right->wordFrequency > curr->maxFrequency) {
-                curr->maxFrequency = curr->right->wordFrequency;
+            if (curr->right->Frequency > curr->maxFrequency) {
+                curr->maxFrequency = curr->right->Frequency;
             }
             return curr;
         }
@@ -354,7 +354,7 @@ void DictionaryTrie::predictUnderscoresHelper(string pattern,
     }
 
     // If the current index of the string is an underscore
-    if (pattern.[index] == '_') {
+    if (pattern[index] == '_') {
         // Recursively retrieves all the underscores on the left subtrie
         if (curr->left) {
             predictUnderscoresHelper(pattern, currentProgress, index,
@@ -415,9 +415,7 @@ void DictionaryTrie::predictUnderscoresHelper(string pattern,
                     }
                 }
                 return;
-            }
-            // if we are not at the end of the prefix
-            else {  // recurse child
+            } else {  // recurse child
                 predictUnderscoresHelper(pattern, currentProgress, index + 1,
                                          curr->child, numCompletions);
             }
