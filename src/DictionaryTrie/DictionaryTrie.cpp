@@ -45,7 +45,7 @@ bool DictionaryTrie::insert(string word, unsigned int freq) {
 
     // if the tree is empty
     if (root == nullptr) {
-        root = new DictionaryTrieNode(word.at(0));
+        root = new DictionaryTrieNode(word.at(0));  // root = word[0]
         curr = root;
 
         int index = 1;
