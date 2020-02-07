@@ -1,7 +1,10 @@
 /**
- * TODO: File HEADER
+ * This File contains several tests
+ * that check the functionality of the
+ * Dictionary Trie functions
  *
- * Author:
+ * Author: Joseph Mattingly
+ *         Bijan Afghani
  */
 
 #include <algorithm>
