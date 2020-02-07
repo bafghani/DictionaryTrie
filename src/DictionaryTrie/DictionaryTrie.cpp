@@ -45,10 +45,10 @@ bool DictionaryTrie::insert(string word, unsigned int freq) {
 
     // if the tree is empty
     if (root == nullptr) {
-        root = new DictionaryTrieNode(word.at(0));  // root = word[0]
+        root = new DictionaryTrieNode(word[0]);
         curr = root;
 
-        int index = 1;
+        unsigned int index = 1;
 
         while (index < word.length()) {
             curr->child = new DictionaryTrieNode(word[index]);
@@ -57,7 +57,7 @@ bool DictionaryTrie::insert(string word, unsigned int freq) {
         }
 
         curr->isWordNode = true;
-        curr->wordFrequency = freq;
+        curr->Frequency = freq;
 
         return true;
     }
@@ -82,18 +82,18 @@ bool DictionaryTrie::find(string word) const {
     DictionaryTrieNode* curr = root;
 
     // iterate through the characters of the word
-    string::iterator strItr = word.begin();
+    string::iterator Itr = word.begin();
 
     if (curr == nullptr) {  // edge case null node
         return false;
     }
 
     while (true) {
-        if (curr == nullptr) {
+        if (curr == nullptr) {  // node does not exist
             return 0;
         }
 
-        if (*strItr < curr->nodeLabel) {  // Traverse left
+        if (*Itr < curr->nodeLabel) {  // Traverse left
             if (curr->left != nullptr) {
                 curr = curr->left;
             } else {
@@ -101,7 +101,7 @@ bool DictionaryTrie::find(string word) const {
             }
         }
 
-        else if (*strItr > curr->nodeLabel) {  // Traverse right
+        else if (*Itr > curr->nodeLabel) {  // Traverse right
             if (curr->right != nullptr) {
                 curr = curr->right;
             } else {
@@ -113,17 +113,17 @@ bool DictionaryTrie::find(string word) const {
         else {
             // if we are at the end of the word and the node is the end of a
             // word
-            if (strItr == word.end() - 1 && *strItr == curr->nodeLabel &&
+            if (Itr == word.end() - 1 && *Itr == curr->nodeLabel &&
                 curr->isWordNode) {
-                return true;
+                return true;  // find successful
             }
 
             else {  // if word is not complete continue traversing downward
                 // Traverse down to curr->child
                 if (curr->nodeLabel ==
-                    *strItr) {  // if char matches the char in the string
+                    *Itr) {  // if char matches the char in the string
                     curr = curr->child;
-                    strItr++;
+                    Itr++;
                 }
 
                 else {  // otherwise word does not exist
@@ -142,31 +142,31 @@ bool DictionaryTrie::find(string word) const {
  **/
 vector<string> DictionaryTrie::predictCompletions(string prefix,
                                                   unsigned int numCompletions) {
-    vector<string> finalCompletions;  // vector to store all predictions
+    vector<string> completionSet;  // vector to store all predictions
 
     if (numCompletions <= 0) {  // Edge case if numCompletions is <= 0
-        return finalCompletions;
+        return CompletionSet;
     }
     // find node that contains prefix
-    DictionaryTrieNode* lastPrefixNode = findNode(prefix);
+    DictionaryTrieNode* endOfPrefix = findNode(prefix);
 
-    if (lastPrefixNode == nullptr) {  // Returns if node is null
-        return finalCompletions;
+    if (endOfPrefix == nullptr) {  // Returns if node is null
+        return CompletionSet;
     }
 
     // if node is a word, push to Priority Queue
-    if (lastPrefixNode->isWordNode) {
-        thisPQ.push(pair<int, string>(lastPrefixNode->wordFrequency, prefix));
+    if (endOfPrefix->isWordNode) {
+        thisPQ.push(pair<int, string>(endOfPrefix->Frequency, prefix));
     }
 
     // Depth First Search
-    depthFirst(prefix, lastPrefixNode->child, numCompletions);
+    depthFirst(prefix, endOfPrefix->child, numCompletions);
 
     while (thisPQ.size() != 0) {  // push into vector
-        finalCompletions.push_back(thisPQ.top().second);
+        CompletionSet.push_back(thisPQ.top().second);
         thisPQ.pop();  // pop from Priority Queue
     }
-    return finalCompletions;
+    return CompletionSet;
 }
 
 /* predicts words given a pattern with underscores
@@ -176,20 +176,20 @@ vector<string> DictionaryTrie::predictCompletions(string prefix,
  **/
 std::vector<string> DictionaryTrie::predictUnderscores(
     string pattern, unsigned int numCompletions) {
-    vector<string> finalCompletionSet;  // vector to store string predictions
+    vector<string> completionSet;  // vector to store string predictions
     // Edge case (numCompletions <= 0 or pattern is empty string)
     if (numCompletions <= 0 || pattern == "") {
-        return finalCompletionSet;  // return empty list
+        return completionSet;  // return empty list
     }
     // helper method to recursively find the underscore patterns
     predictUnderscoresHelper(pattern, "", 0, root, numCompletions);
     // add priority queue's elements into vector in required order
     while (!underscorePQ.empty()) {
-        finalCompletionSet.push_back(underscorePQ.top().second);
+        completionSet.push_back(underscorePQ.top().second);
         underscorePQ.pop();
     }
     // return the vector of suggested completions
-    return finalCompletionSet;
+    return completionSet;
 }
 
 /**
@@ -203,12 +203,20 @@ DictionaryTrie::~DictionaryTrie() { deleteAll(root); }
  * Insert Node Helper Method
  */
 DictionaryTrie::DictionaryTrieNode* DictionaryTrie::insertNode(
-    string word, int index, int wordFreq, DictionaryTrieNode* curr) {
+    string word, int index, int Freq, DictionaryTrieNode* curr) {
     if (curr == nullptr) {  // if the node does not exists
         if (index == word.length() - 1) {
             curr = new DictionaryTrieNode(word[index]);
-            curr->wordFrequency = wordFreq;
+            curr->Frequency = Freq;
             curr->isWordNode = true;
+            /* MAX FREQ UPDATE */
+            curr->maxFrequency = Freq;
+            if (curr->left->wordFrequency > curr->maxFrequency) {
+                curr->maxFrequency = curr->left->wordFrequency;
+            }
+            if (curr->right->wordFrequency > curr->maxFrequency) {
+                curr->maxFrequency = curr->right->wordFrequency;
+            }
             return curr;
         } else {
             curr = new DictionaryTrieNode(word[index]);
@@ -219,33 +227,41 @@ DictionaryTrie::DictionaryTrieNode* DictionaryTrie::insertNode(
         if (index == word.length() - 1 && curr->nodeLabel == word[index] &&
             curr->isWordNode == false) {
             curr->isWordNode = true;
-            curr->wordFrequency = wordFreq;
+            curr->Frequency = Freq;
+            /* MAX FREQ UPDATE */
+            curr->maxFrequency = Freq;
+            if (curr->left->wordFrequency > curr->maxFrequency) {
+                curr->maxFrequency = curr->left->wordFrequency;
+            }
+            if (curr->right->wordFrequency > curr->maxFrequency) {
+                curr->maxFrequency = curr->right->wordFrequency;
+            }
             return curr;
         }
     }
 
     if (word[index] < curr->nodeLabel) {  // recurse left
-        curr->left = insertNode(word, index, wordFreq, curr->left);
+        curr->left = insertNode(word, index, Freq, curr->left);
     }
 
     else if (word[index] > curr->nodeLabel) {  // recurse right
-        curr->right = insertNode(word, index, wordFreq, curr->right);
+        curr->right = insertNode(word, index, Freq, curr->right);
     }
 
     else {  // recurse child
-        curr->child = insertNode(word, index + 1, wordFreq, curr->child);
+        curr->child = insertNode(word, index + 1, Freq, curr->child);
     }
 
     return curr;  // return the current node
 }
 
 /**
- * findNode
+ * findNode: Helper Method for Find
  */
 DictionaryTrie::DictionaryTrieNode* DictionaryTrie::findNode(string prefix) {
     DictionaryTrieNode* curr = root;
 
-    string::iterator strItr = prefix.begin();  // iterate through the string
+    string::iterator Itr = prefix.begin();  // iterate through the string
 
     if (root == nullptr) {  // edge case null root
         return nullptr;
@@ -256,7 +272,7 @@ DictionaryTrie::DictionaryTrieNode* DictionaryTrie::findNode(string prefix) {
             break;
         }
 
-        if (*strItr < curr->nodeLabel) {  // Iterate left
+        if (*Itr < curr->nodeLabel) {  // Iterate left
             if (curr->left) {
                 curr = curr->left;
             } else {
@@ -264,7 +280,7 @@ DictionaryTrie::DictionaryTrieNode* DictionaryTrie::findNode(string prefix) {
             }
         }
 
-        else if (*strItr > curr->nodeLabel) {  // Iterate right
+        else if (*Itr > curr->nodeLabel) {  // Iterate right
             if (curr->right) {
                 curr = curr->right;
             } else {
@@ -273,15 +289,15 @@ DictionaryTrie::DictionaryTrieNode* DictionaryTrie::findNode(string prefix) {
         }
 
         else {  // Iterate down
-            // we are at prefix
-            if (strItr == prefix.end() - 1 && *strItr == curr->nodeLabel) {
+            // we are at the end of prefix
+            if (Itr == prefix.end() - 1 && *Itr == curr->nodeLabel) {
                 return curr;
             }
 
             else {  // iterate to the child
-                if (curr->nodeLabel == *strItr) {
+                if (curr->nodeLabel == *Itr) {
                     curr = curr->child;
-                    strItr++;
+                    Itr++;
                 } else {
                     return nullptr;
                 }
@@ -292,7 +308,7 @@ DictionaryTrie::DictionaryTrieNode* DictionaryTrie::findNode(string prefix) {
 }
 
 /**
- * DFS
+ * DFS : Helper method to optimize predictCompletions
  */
 void DictionaryTrie::depthFirst(string prefix, DictionaryTrieNode* curr,
                                 int numCompletions) {
@@ -306,11 +322,11 @@ void DictionaryTrie::depthFirst(string prefix, DictionaryTrieNode* curr,
 
         if (curr->isWordNode) {  // added to PQ
             if (thisPQ.size() < numCompletions) {
-                thisPQ.push(pair<int, string>(curr->wordFrequency, prefix));
+                thisPQ.push(pair<int, string>(curr->Frequency, prefix));
             } else {
-                if (thisPQ.top().first < curr->wordFrequency) {
+                if (thisPQ.top().first < curr->Frequency) {
                     thisPQ.pop();
-                    thisPQ.push(pair<int, string>(curr->wordFrequency, prefix));
+                    thisPQ.push(pair<int, string>(curr->Frequency, prefix));
                 }
             }
         }
@@ -324,8 +340,7 @@ void DictionaryTrie::depthFirst(string prefix, DictionaryTrieNode* curr,
  */
 
 void DictionaryTrie::predictUnderscoresHelper(string pattern,
-                                              string patternInProgress,
-                                              int index,
+                                              string currentProgress, int index,
                                               DictionaryTrieNode* curr,
                                               int numCompletions) {
     // Edge Case (Index Out of Bounds)
@@ -342,38 +357,38 @@ void DictionaryTrie::predictUnderscoresHelper(string pattern,
     if (pattern.[index] == '_') {
         // Recursively retrieves all the underscores on the left subtrie
         if (curr->left) {
-            predictUnderscoresHelper(pattern, patternInProgress, index,
+            predictUnderscoresHelper(pattern, currentProgress, index,
                                      curr->left, numCompletions);
         }
 
         // recursively retrieves all the underscores on the right subtrie
         if (curr->right) {
-            predictUnderscoresHelper(pattern, patternInProgress, index,
+            predictUnderscoresHelper(pattern, currentProgress, index,
                                      curr->right, numCompletions);
         }
 
         // push back to update current pattern in progress by adding curr's char
-        patternInProgress.push_back(curr->nodeLabel);
+        currentProgress.push_back(curr->nodeLabel);
         // if curr is a word node and we have reached the last index
         if (curr->isWordNode && index == pattern.length() - 1) {
             if (underscorePQ.size() < numCompletions) {
                 underscorePQ.push(pair<int, string>(
-                    curr->wordFrequency, patternInProgress));  // add to PQ
+                    curr->Frequency, currentProgress));  // add to PQ
             } else {
-                if (curr->wordFrequency >
+                if (curr->Frequency >
                     underscorePQ.top()
                         .first) {  // if curr has greater frequency
                                    // than top of PQ, replace with curr
                     underscorePQ.pop();
-                    underscorePQ.push(pair<int, string>(curr->wordFrequency,
-                                                        patternInProgress));
+                    underscorePQ.push(
+                        pair<int, string>(curr->Frequency, currentProgress));
                 }
             }
             return;
         }
         // if it is not a word node recurse on child
         if (curr->child) {
-            predictUnderscoresHelper(pattern, patternInProgress, index + 1,
+            predictUnderscoresHelper(pattern, currentProgress, index + 1,
                                      curr->child, numCompletions);
         }
     }
@@ -382,28 +397,28 @@ void DictionaryTrie::predictUnderscoresHelper(string pattern,
     else {
         // if the char of current is equal to the string's char
         if (pattern[index] == curr->nodeLabel) {
-            patternInProgress.push_back(
+            currentProgress.push_back(
                 curr->nodeLabel);  // add char to pattern in progress
 
             // if we are at the end of the prefix
             if (curr->isWordNode && index == pattern.length() - 1) {
                 if (underscorePQ.size() < numCompletions) {
                     underscorePQ.push(pair<int, string>(
-                        curr->wordFrequency,
-                        patternInProgress));  // push new pair to PQ
+                        curr->Frequency,
+                        currentProgress));  // push new pair to PQ
                 } else {
-                    if (curr->wordFrequency > underscorePQ.top().first) {
+                    if (curr->Frequency > underscorePQ.top().first) {
                         underscorePQ.pop();
                         underscorePQ.push(pair<int, string>(
-                            curr->wordFrequency,
-                            patternInProgress));  // update order of PQ
+                            curr->Frequency,
+                            currentProgress));  // update order of PQ
                     }
                 }
                 return;
             }
             // if we are not at the end of the prefix
             else {  // recurse child
-                predictUnderscoresHelper(pattern, patternInProgress, index + 1,
+                predictUnderscoresHelper(pattern, currentProgress, index + 1,
                                          curr->child, numCompletions);
             }
         }
@@ -411,12 +426,12 @@ void DictionaryTrie::predictUnderscoresHelper(string pattern,
         else {
             // if less than current node's char then recurse on left
             if (pattern[index] < curr->nodeLabel) {
-                predictUnderscoresHelper(pattern, patternInProgress, index,
+                predictUnderscoresHelper(pattern, currentProgress, index,
                                          curr->left, numCompletions);
             }
             // if greater than current node's char recurse on right
             if (pattern[index] > curr->nodeLabel) {
-                predictUnderscoresHelper(pattern, patternInProgress, index,
+                predictUnderscoresHelper(pattern, currentProgress, index,
                                          curr->right, numCompletions);
             }
         }
